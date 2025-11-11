@@ -129,6 +129,24 @@ El deployment en Sepolia está disponible para "verificación formal" del códig
 | Uniswap V2 Router | `0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D` |
 | Uniswap V2 Factory | `0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f` |
 
+### Sepolia Testnet
+
+| Componente | Address |
+|------------|---------|
+| Uniswap V2 Router | `0xC532a74256D3Db42D0Bf7a0400fEFDbad7694008` |
+| Uniswap V2 Factory | `0x7E0987E5b3a30e3f2828572Bb659A548460a3003` |
+| USDC (Circle) | `0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238` |
+| WETH | `0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14` |
+
+**Parámetros de Deploy para Sepolia:**
+```
+withdrawalLimitUSDC: 1000000000 (1,000 USDC)
+bankCapUSDC: 100000000000 (100,000 USDC)
+uniswapRouter: 0xC532a74256D3Db42D0Bf7a0400fEFDbad7694008
+uniswapFactory: 0x7E0987E5b3a30e3f2828572Bb659A548460a3003
+usdc: 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238
+```
+
 ---
 
 ## ✨ Características Implementadas
@@ -425,7 +443,35 @@ cast send $CONTRACT_SEPOLIA "addToken(address)" \
 # Esto demuestra que el sistema de validación funciona correctamente
 
 ```
+## 📋 Addresses de Referencia
 
+### Tenderly Fork (Mainnet state)
+
+| Componente | Address |
+|------------|---------|
+| KipuBankV3 | `0xE0f14bcF51C00F169E6e60461550B70483601745` |
+| USDC (Mainnet) | `0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48` |
+| WETH (Mainnet) | `0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2` |
+| Uniswap V2 Router | `0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D` |
+| Uniswap V2 Factory | `0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f` |
+
+### Sepolia Testnet
+
+| Componente | Address |
+|------------|---------|
+| Uniswap V2 Router | `0xC532a74256D3Db42D0Bf7a0400fEFDbad7694008` |
+| Uniswap V2 Factory | `0x7E0987E5b3a30e3f2828572Bb659A548460a3003` |
+| USDC (Circle) | `0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238` |
+| WETH | `0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14` |
+
+**Parámetros de Deploy para Sepolia:**
+```
+withdrawalLimitUSDC: 1000000000 (1,000 USDC)
+bankCapUSDC: 100000000000 (100,000 USDC)
+uniswapRouter: 0xC532a74256D3Db42D0Bf7a0400fEFDbad7694008
+uniswapFactory: 0x7E0987E5b3a30e3f2828572Bb659A548460a3003
+usdc: 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238
+```
 
 
 ## 🔐 Consideraciones de Seguridad
