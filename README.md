@@ -32,7 +32,7 @@ Banco DeFi que acepta cualquier token soportado por Uniswap V2 y automáticament
 
 **Network:** Sepolia Testnet  
 **Contract Address:** `[0x4110be0d47da52955eb139835fe5de2b6a3a024e]`  
-**Verified:** [Ver en Routescan](https://testnet.routescan.io/address/0x4110BE0D47Da52955eb139835fE5De2B6a3A024E/contract/11155111/code)  
+**Verified:** [Ver en Etherscan](https://sepolia.etherscan.io/address/0x4110BE0D47Da52955eb139835fE5De2B6a3A024E#code).
 **Estado:**  ⚠️ **Constructor modificado - Funcionalidad básica**
 
 **Funcionalidad disponible en Sepolia:**
