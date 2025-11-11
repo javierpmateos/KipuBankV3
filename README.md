@@ -536,9 +536,6 @@ kipu-bank-v3/
     └── KipuBankv3sep.sol           # Contrato alternativo sepolia
 ├── script/
 │   └── DeployKipuBankv3.s.sol      # Script de deployment (Tenderly)
-├── lib/
-│   ├── forge-std/                  # Foundry standard library
-│   └── openzeppelin-contracts/     # OpenZeppelin dependencies
 ├── foundry.toml                    # Configuración de Foundry
 ├── .gitignore
 ├── LICENSE                         # MIT License
