@@ -182,6 +182,7 @@ contract KipuBankV3 is AccessControl, ReentrancyGuard {
      * @param _uniswapRouter Uniswap V2 Router address
      * @param _uniswapFactory Uniswap V2 Factory address
      * @param _usdc USDC token address
+     * @dev SEPOLIA VERSION: Only USDC is pre-configured. ETH support must be added via addTokenETH()
      */
     constructor(
         uint256 _withdrawalLimitUSDC,
@@ -206,8 +207,8 @@ contract KipuBankV3 is AccessControl, ReentrancyGuard {
         _grantRole(ADMIN_ROLE, msg.sender);
         _grantRole(OPERATOR_ROLE, msg.sender);
         
+        // ⚠️ DIFERENCIA SEPOLIA: Solo USDC pre-configurado
         // Add USDC support (no swap needed)
-        // USDC is always supported by default for direct deposits
         s_swapConfigs[i_usdc] = SwapConfig({
             requiresSwap: false,
             isSupported: true,
@@ -215,8 +216,9 @@ contract KipuBankV3 is AccessControl, ReentrancyGuard {
         });
         s_supportedTokens.push(i_usdc);
         
-        // ETH support can be added by admin after deployment using addTokenETH()
-        // This allows validation of WETH/USDC pair existence before enabling ETH deposits
+        // ⚠️ ETH NO está pre-configurado en Sepolia
+        // Se debe agregar manualmente con addTokenETH() después del deployment
+        // Razón: Evitar revert si el par WETH/USDC no tiene liquidez suficiente
     }
 
     /*/////////////////////////
@@ -330,12 +332,13 @@ contract KipuBankV3 is AccessControl, ReentrancyGuard {
     
     /**
      * @notice Add new token support (admin only)
-     * @param _token Token address (address(0) for ETH)
+     * @param _token Token address
      * @dev Automatically detects if direct pair with USDC exists
      */
     function addToken(address _token) external onlyRole(ADMIN_ROLE) {
         if (s_swapConfigs[_token].isSupported) revert TokenAlreadySupported();
         if (_token == i_usdc) revert TokenAlreadySupported();
+        if (_token == NATIVE_TOKEN) revert TokenNotSupported(); // Use addTokenETH() for ETH
         
         // Check if pair exists
         address pair = i_uniswapFactory.getPair(_token, i_usdc);
@@ -363,7 +366,7 @@ contract KipuBankV3 is AccessControl, ReentrancyGuard {
      */
     function removeToken(address _token) external onlyRole(ADMIN_ROLE) {
         if (!s_swapConfigs[_token].isSupported) revert TokenNotSupported();
-        if (_token == NATIVE_TOKEN || _token == i_usdc) revert TokenNotSupported();
+        if (_token == i_usdc) revert TokenNotSupported();
         
         s_swapConfigs[_token].isSupported = false;
         
@@ -409,6 +412,7 @@ contract KipuBankV3 is AccessControl, ReentrancyGuard {
      * @notice Internal deposit with automatic swap to USDC
      * @param _token Token address
      * @param _amount Amount in token decimals
+     * @dev CORRECTED: Atomic bankCap verification with pre-calculated total
      */
     function _depositWithSwap(address _token, uint256 _amount) internal supportedToken(_token) {
         SwapConfig memory config = s_swapConfigs[_token];
@@ -420,16 +424,25 @@ contract KipuBankV3 is AccessControl, ReentrancyGuard {
         } else {
             // Swap to USDC
             usdcReceived = _swapToUSDC(_token, _amount, config.swapPath);
+            
+            // CORRECTION 1: Explicit validation that swap was successful
+            if (usdcReceived == 0) revert SwapFailed();
         }
         
-        // Check bank capacity
-        if (s_totalDepositsUSDC + usdcReceived > i_bankCapUSDC) {
+        // CORRECTION 2: Atomic calculation before verification
+        // This ensures the same value is used for both check and state update
+        uint256 newTotalDeposits = s_totalDepositsUSDC + usdcReceived;
+        
+        // CORRECTION 3: Verify bank capacity with pre-calculated value
+        if (newTotalDeposits > i_bankCapUSDC) {
             revert BankCapacityExceeded();
         }
         
-        // Update state
+        // CORRECTION 4: Update state using pre-calculated value
+        // This guarantees atomicity and prevents any edge case where
+        // the calculation could give different results
         s_balances[msg.sender] += usdcReceived;
-        s_totalDepositsUSDC += usdcReceived;
+        s_totalDepositsUSDC = newTotalDeposits;
         s_depositCount++;
         
         emit Deposit(msg.sender, _token, _amount, usdcReceived, s_balances[msg.sender]);
