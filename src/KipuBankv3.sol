@@ -386,6 +386,7 @@ contract KipuBankV3 is AccessControl, ReentrancyGuard {
      * @notice Internal deposit with automatic swap to USDC
      * @param _token Token address
      * @param _amount Amount in token decimals
+     * @dev CORRECTED: Atomic bankCap verification with pre-calculated total
      */
     function _depositWithSwap(address _token, uint256 _amount) internal supportedToken(_token) {
         SwapConfig memory config = s_swapConfigs[_token];
@@ -397,16 +398,25 @@ contract KipuBankV3 is AccessControl, ReentrancyGuard {
         } else {
             // Swap to USDC
             usdcReceived = _swapToUSDC(_token, _amount, config.swapPath);
+            
+            // CORRECTION 1: Explicit validation that swap was successful
+            if (usdcReceived == 0) revert SwapFailed();
         }
        
-        // Check bank capacity
-        if (s_totalDepositsUSDC + usdcReceived > i_bankCapUSDC) {
+        // CORRECTION 2: Atomic calculation before verification
+        // This ensures the same value is used for both check and state update
+        uint256 newTotalDeposits = s_totalDepositsUSDC + usdcReceived;
+        
+        // CORRECTION 3: Verify bank capacity with pre-calculated value
+        if (newTotalDeposits > i_bankCapUSDC) {
             revert BankCapacityExceeded();
         }
        
-        // Update state
+        // CORRECTION 4: Update state using pre-calculated value
+        // This guarantees atomicity and prevents any edge case where
+        // the calculation could give different results
         s_balances[msg.sender] += usdcReceived;
-        s_totalDepositsUSDC += usdcReceived;
+        s_totalDepositsUSDC = newTotalDeposits;
         s_depositCount++;
        
         emit Deposit(msg.sender, _token, _amount, usdcReceived, s_balances[msg.sender]);
